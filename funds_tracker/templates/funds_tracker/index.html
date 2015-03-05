@@ -1,10 +1,10 @@
+{% load humanize %}
 <h1> All Donations </h1>
 <p>
 <table>
-{% if all_donations %}
-    {% for donation in all_donations %}
-    <tr>
-        <td>{{donation.year}}</td><td>{{donation.party}}</td><td>{{donation.donor}}</td><td>{{donation.party_state}}</td><td>${{donation.amount}}</td>
+{% if major_national_parties %}
+    {% for key, value in major_national_parties.items %} <tr>
+        <td>{{key}}</td><td>${{value|intcomma}}</td>
     </tr>
     {% endfor %} 
 {% endif %}
