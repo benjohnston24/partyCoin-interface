@@ -3,8 +3,9 @@
 <p>
 <table>
 {% if major_national_parties %}
-    {% for key, value in major_national_parties.items %} <tr>
-        <td>{{key}}</td><td>${{value|intcomma}}</td>
+    {% for value in major_national_parties %}
+     <tr>
+            <td>{{value.0}}</td><td>${{value.1|intcomma}}</td>
     </tr>
     {% endfor %} 
 {% endif %}
