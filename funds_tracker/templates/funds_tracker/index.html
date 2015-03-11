@@ -1,12 +1,38 @@
-{% load humanize %}
-<h1> All Donations </h1>
-<p>
-<table>
-{% if major_national_parties %}
-    {% for value in major_national_parties %}
-     <tr>
-            <td>{{value.0}}</td><td>${{value.1|intcomma}}</td>
-    </tr>
-    {% endfor %} 
-{% endif %}
-</p>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>partyCoin - Australia's Political Party Funds Tracker </title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    {% load humanize %}
+    <body>
+    <div class="container">
+        <h1> All Donations </h1>
+        <p>
+        <table>
+        {% if major_national_parties %}
+            {% for value in major_national_parties %}
+             <tr>
+                    <td>{{value.0}}</td><td>${{value.1|intcomma}}</td>
+            </tr>
+            {% endfor %} 
+        {% endif %}
+        </p>
+        <p><a
+            href="https://en.wikipedia.org/wiki/File:Liberal_Party_of_Australia_logo.png#mediaviewer/File:Liberal_Party_of_Australia_logo.png"><img
+            alt="Liberal Party of Australia logo.png"
+            src="https://upload.wikimedia.org/wikipedia/en/3/38/Liberal_Party_of_Australia_logo.png"></a><br>"<a
+            href="https://en.wikipedia.org/wiki/File:Liberal_Party_of_Australia_logo.png#mediaviewer/File:Liberal_Party_of_Australia_logo.png">Liberal
+            Party of Australia logo</a>" by Liberal Party of Australia - <a
+            rel="nofollow" class="external free"
+            href="http://www.liberal.org.au/">http://www.liberal.org.au/</a>. Licensed
+        under <a title="Fair use"
+            href="//en.wikipedia.org/wiki/File:Liberal_Party_of_Australia_logo.png">Fair
+            use</a> via <a href="//en.wikipedia.org/wiki/">Wikipedia</a>.</p>
+     </div>
+
+
+</html>
