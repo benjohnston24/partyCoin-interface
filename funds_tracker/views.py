@@ -28,14 +28,14 @@ __license__ = 'MPL v2.0'
 # https://github.com/django/django/blob/master/LICENSE
 ##IMPORTS#####################################################################
 
-#from django.shortcuts import render
+from django.shortcuts import render
 from django.views import generic
 from funds_tracker.models import Donation, PartyInfo
 from django.db.models import Max, Sum
 import operator
 ##############################################################################
 #The number of top parties to list in the summary
-NO_TOP_PARTIES = 5
+NO_TOP_PARTIES = 4
 
 
 #Rename to summaryview
@@ -65,7 +65,14 @@ class IndexView(generic.ListView):
         for i in range(NO_TOP_PARTIES):
             filtered_parties.append((sorted_totals[i][0].__str__(),
                                     sorted_totals[i][1]))
-        return filtered_parties
+
+        #Get the logos and wiki pages of the most well funded parties
+        for i in range(len(filtered_parties)):
+            w_l = PartyInfo.objects.filter(party=filtered_parties[i][0]).\
+                values('logo', 'wiki_page')
+            filtered_parties[i] += (w_l[0]['logo'], w_l[0]['wiki_page'])
+        print filtered_parties
+        return {'summary': filtered_parties}
         #return Donation.objects.order_by('year')
 
 
@@ -76,3 +83,9 @@ class ImageView(generic.ListView):
 
     def get_queryset(self):
         return PartyInfo.objects.all().order_by('party')
+
+
+def party(request, pk):
+    party = PartyInfo.objects.filter(party=pk)
+    context = {'party': party}
+    return render(request, 'funds_tracker/party.html', context)

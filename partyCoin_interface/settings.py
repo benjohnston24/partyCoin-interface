@@ -50,6 +50,11 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.media',
+)
+
 ROOT_URLCONF = 'partyCoin_interface.urls'
 
 WSGI_APPLICATION = 'partyCoin_interface.wsgi.application'
@@ -88,3 +93,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 STATIC_URL = '/static/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'funds_tracker', 'media')
+MEDIA_URL = '/media/'
+STATICFILE_DIRS = (
+    os.path.join(BASE_DIR, 'funds_tracker', 'static'),
+)

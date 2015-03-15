@@ -25,11 +25,19 @@ __license__ = 'MPL v2.0'
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 ##IMPORTS#####################################################################
+from django.conf import settings
 from django.conf.urls import patterns, url
+from django.conf.urls.static import static
 from funds_tracker import views
 ##############################################################################
 
 urlpatterns = patterns('',
                        url(r'^$', views.IndexView.as_view(), name='index'),
                        url(r'^logos/$', views.ImageView.as_view(), name='logos'),
+                       #url(r'^party/(?P<pk>.*)$', views.party,
+                       #    name='party'),
+                       url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {
+                                                    'document_root': settings.MEDIA_ROOT,
+                                                    'show_indexes': True})
                        )
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

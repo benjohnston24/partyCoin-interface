@@ -1,9 +1,13 @@
+
+{% load staticfiles %}
 <html>
 <h1>Logos</h1>
 <table>
 {% for party in partyInfo %}
-    <tr><td> {{party.party}} </td><td><img src= {{party.logo}}
-            style="height:50px"></td></tr> 
+<tr><td><a href="{{party.wiki_page}}"> {{party.party}} </td>
+        <td><img src="{{party.logo}}" style="height:50px"
+            alt="No logo available"/></a></td>
+</tr> 
 {% endfor %}
 </table>
 </html>

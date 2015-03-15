@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 # Create your models here.
@@ -35,10 +36,11 @@ class Donation(models.Model):
 
     def __str__(self):
         return '%s-%s:%s:$%0.2f' % (
-                                 self.get_year(),
-                                 self.get_party(),
-                                 self.get_donor(),
-                                 self.amount)
+               self.get_year(),
+               self.get_party(),
+               self.get_donor(),
+               self.amount)
+
 
 class PartyInfo(models.Model):
     party = models.CharField(max_length=200, default='')
