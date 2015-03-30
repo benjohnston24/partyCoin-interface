@@ -32,6 +32,12 @@ from django.shortcuts import render
 from django.views import generic
 from funds_tracker.models import Donation, PartyInfo
 from django.db.models import Max, Sum
+from graphos.renderers import gchart
+from graphos.sources.simple import SimpleDataSource
+import matplotlib.pyplot as plt
+from StringIO import StringIO
+import base64
+
 import operator
 ##############################################################################
 #The number of top parties to list in the summary
@@ -71,8 +77,18 @@ class IndexView(generic.ListView):
             w_l = PartyInfo.objects.filter(party=filtered_parties[i][0]).\
                 values('logo', 'wiki_page')
             filtered_parties[i] += (w_l[0]['logo'], w_l[0]['wiki_page'])
-        print filtered_parties
-        return {'summary': filtered_parties}
+        #print filtered_parties
+
+        #Temp
+        x = [1, 2, 3, 4, 5]
+        y = [1, 2, 3, 4, 5]
+        fig = plt.plot(x, y)
+        chart_buffer = StringIO()
+        plt.savefig(chart_buffer, format="png")
+        chart = base64.b64encode(chart_buffer.getvalue())
+
+        return {'summary': filtered_parties,
+                'chart': chart}
         #return Donation.objects.order_by('year')
 
 
