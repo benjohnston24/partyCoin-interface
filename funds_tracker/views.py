@@ -19,14 +19,14 @@ __revision__ = '0.1'
 __date__ = "Wed Mar 11 13:07:30 AEDT 2015"
 __license__ = 'MPL v2.0'
 
-## LICENSE DETAILS############################################################
+# LICENSE DETAILS############################################################
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://moziljla.org/MPL/2.0/.
 
 # Django usage is subject to the terms and conditions of the FREE-BSD license
 # https://github.com/django/django/blob/master/LICENSE
-##IMPORTS#####################################################################
+# IMPORTS#####################################################################
 
 from django.shortcuts import render
 from django.views import generic
@@ -39,9 +39,8 @@ from settings import STATES_ABBR, STATES_LIST
 
 import operator
 
-import pdb
 ##############################################################################
-#The number of top parties to list in the summary
+# The number of top parties to list in the summary
 NO_TOP_PARTIES = 4
 LIBERAL_BLUE = '#1e6f88'
 ALP_RED = '#B83537'
@@ -52,14 +51,14 @@ COLOURS = []
 
 
 def get_summary(state):
-    #Get the most recent year
+    # Get the most recent year
     max_year = Donation.objects.all().aggregate(Max('year'))['year__max']
-    #Get all objects for that year
+    # Get all objects for that year
     max_year_objects = Donation.objects.filter(year=max_year.__str__(),
                                                party_state=state.lower())
     parties = max_year_objects.values_list('party', flat=True).\
         order_by('party').distinct()
-    #Get the totals for the most funded parties
+    # Get the totals for the most funded parties
     totals = {}
     grand_total = 0
     for party in parties:
@@ -68,7 +67,7 @@ def get_summary(state):
         grand_total += totals[party]
     sorted_totals = sorted(totals.items(), key=operator.itemgetter(1),
                            reverse=True)
-    #Create a blank list to return
+    # Create a blank list to return
     filtered_parties = []
     filtered_names = []
     filtered_values = []
@@ -76,7 +75,7 @@ def get_summary(state):
         no_of_parties = len(totals)
     else:
         no_of_parties = NO_TOP_PARTIES
-    #Return only the most well funded parties
+    # Return only the most well funded parties
     for i in range(no_of_parties):
         filtered_parties.append((sorted_totals[i][0].__str__(),
                                 sorted_totals[i][1]))
@@ -85,31 +84,31 @@ def get_summary(state):
 
     filtered_names.append('Others')
     filtered_values.append(grand_total - sum(filtered_values))
-    #Get the logos and wiki pages of the most well funded parties
+    # Get the logos and wiki pages of the most well funded parties
     for i in range(len(filtered_parties)):
         w_l = PartyInfo.objects.filter(party=filtered_parties[i][0]).\
             values('logo', 'wiki_page')
-        try:
-            filtered_parties[i] += (w_l[0]['logo'], w_l[0]['wiki_page'])
-        except:
-            ##TODO handle this better
-            pass
+        # try:
+        filtered_parties[i] += (w_l[0]['logo'], w_l[0]['wiki_page'])
+        # except:
+        # TODO handle this better
+        # pass
 
     return (max_year, filtered_parties, filtered_names, filtered_values)
 
 
-#Rename to summaryview
+# Rename to summaryview
 class IndexView(generic.ListView):
-    #model = Donation
+    # model = Donation
     template_name = 'funds_tracker/index.html'
     context_object_name = 'major_national_parties'
 
     def get_queryset(self):
         max_year_FED, filtered_parties_FED, filtered_names, filtered_values = \
             get_summary('FED')
-        #Colours for pie chart
+        # Colours for pie chart
         COLOURS = []
-        ##TODO add database of colour codes for parties
+        # TODO add database of colour codes for parties
         for name in filtered_names:
             if name.lower().find('liberal') >= 0:
                 COLOURS.append(LIBERAL_BLUE)
@@ -122,7 +121,7 @@ class IndexView(generic.ListView):
             else:
                 COLOURS.append(OTHERS)
 
-        #Generate Pie chart of national donations
+        # Generate Pie chart of national donations
         patches, texts, autotexts = plt.pie(filtered_values,
                                             labels=filtered_names,
                                             autopct='%1.1f%%',
@@ -141,25 +140,24 @@ class IndexView(generic.ListView):
         plt.savefig(chart_buffer, bbox_inches='tight', format="png")
         chart = base64.b64encode(chart_buffer.getvalue())
 
-        #Create a dictionary for statewide summaries
+        # Create a dictionary for statewide summaries
         state_names = []
         state_values = {}
 
-        #Get the NSW results
+        # Get the NSW results
         for state in STATES_LIST:
             max_year, filtered_parties, filtered_names, filtered_values = \
                 get_summary(state)
             state_names.append(STATES_ABBR[state])
             state_values[STATES_ABBR[state]] = filtered_parties
 
-        print state_values['New South Wales']
+        # print state_values['New South Wales']
         return {'year': '%s - %d' % (max_year_FED, int(max_year_FED) + 1),
                 'summary': filtered_parties_FED,
                 'state_names': state_names,
                 'state_values': state_values,
                 'chart': chart,
                 }
-
 
 class ImageView(generic.ListView):
     model = PartyInfo
@@ -170,7 +168,27 @@ class ImageView(generic.ListView):
         return PartyInfo.objects.all().order_by('party')
 
 
-def party(request, pk):
+def PartySummaryView(request, pk):
     party = PartyInfo.objects.filter(party=pk)
-    context = {'party': party}
-    return render(request, 'funds_tracker/party.html', context)
+    years = Donation.objects.filter(party=pk).order_by('-year')\
+        .values_list('year', flat=True).distinct()
+    amounts_by_year = {}
+    for year in years:
+        amounts_by_year[str(year)] = round(sum(Donation.objects.filter(party=pk,
+                                    year=year).values_list('amount',
+                                    flat=True)), 0)
+    context = {
+        'name': pk,
+        'party': party,
+        'years': years,
+        'amounts_by_year': amounts_by_year,
+    }
+
+    template_name = 'funds_tracker/partyView.html'
+
+    return render(request, template_name, context)
+
+def PartyYearView(request, pk, pk_y):
+    amounts = Donation.objects.filter(party=pk, year=pk_y)
+    import pdb
+    pdb.set_trace()

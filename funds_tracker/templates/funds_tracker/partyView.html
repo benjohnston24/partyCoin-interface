@@ -15,21 +15,18 @@
     {% load humanize %}
     <body>
     <div class="container">
-        <h1>Reporting Period: {{major_national_parties.year}}</h1>
+        <h1>Detailed Party View: {{ name }}</h1>
     </div>
     <div class="container">
-        <h2>Federal Parties </h2>
-        {% if major_national_parties %}
+        <h2>Annual Donations </h2>
             <div class="row">
-                {% for value in major_national_parties.summary %}
-                    <div class="col-lg-3">
-                        <p align="center"><img src="{{value.2}}" style="height:100px" class="img-responsive"></p>
-                        <p align="center"><a href="party/{{value.0}}">{{value.0}}</a></p>
-                        <p align="center">${{value.1|intcomma}}</p>
+                {% for key, value in amounts_by_year.items %}
+                    <div class="col-lg-2">
+                        <p align="center"> <a href="year/{{key}}"> {{key}} </a></p>
+                        <p align="center"> ${{value|intcomma}} </p>
                     </div>
-                {% endfor %} 
+                {% endfor %}
             </div>
-        {% endif %}
     </div>
     <div class="container" align="center">
         <img src="data:image/png;base64,{{major_national_parties.chart}}"/> 
