@@ -38,6 +38,8 @@ import base64
 from settings import STATES_ABBR, STATES_LIST
 
 import operator
+from utilities import get_donation_year_total
+from django.template.defaulttags import register
 
 ##############################################################################
 # The number of top parties to list in the summary
@@ -49,6 +51,10 @@ GREENS_GREEN = '#34e01d'
 OTHERS = '#CA6FD6'
 COLOURS = []
 
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
 
 def get_summary(state):
     # Get the most recent year
@@ -159,6 +165,7 @@ class IndexView(generic.ListView):
                 'chart': chart,
                 }
 
+
 class ImageView(generic.ListView):
     model = PartyInfo
     template_name = 'funds_tracker/logos.html'
@@ -174,9 +181,8 @@ def PartySummaryView(request, pk):
         .values_list('year', flat=True).distinct()
     amounts_by_year = {}
     for year in years:
-        amounts_by_year[str(year)] = round(sum(Donation.objects.filter(party=pk,
-                                    year=year).values_list('amount',
-                                    flat=True)), 0)
+        amounts_by_year[str(year)] = round(get_donation_year_total(pk, year), 0)
+
     context = {
         'name': pk,
         'party': party,
@@ -188,7 +194,25 @@ def PartySummaryView(request, pk):
 
     return render(request, template_name, context)
 
+
 def PartyYearView(request, pk, pk_y):
-    amounts = Donation.objects.filter(party=pk, year=pk_y)
-    import pdb
-    pdb.set_trace()
+    partyInfo = Donation.objects.filter(party=pk, year=pk_y).order_by('-amount')
+
+    template_name = 'funds_tracker/detailView.html'
+
+    names = []
+    amounts = []
+    amounts_by_name = {}
+
+    for party in partyInfo:
+        names.append(party.get_donor())
+        amounts.append(party.amount)
+        amounts_by_name[party.get_donor()] = party.amount
+
+    context = {
+        'names': names,
+        'amounts': amounts,
+        'amounts_by_name': amounts_by_name,
+    }
+
+    return render(request, template_name, context)

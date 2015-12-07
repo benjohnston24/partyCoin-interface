@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>partyCoin - Australia's Political Party Funds Tracker </title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+        
+        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+        <script type="text/javascript">google.load("visualization", "1", {packages:["corechart"]});
+        </script>
+    </head>
+    {% load humanize %}
+    <body>
+    <div class="container">
+        <h1>Detailed Party View: {{ name }}</h1>
+    </div>
+    <div class="container">
+        <h2>Annual Donations </h2>
+            <div class="row">
+                {% for name in names %}
+                    <div class="col-sml-2">
+                        <p align="center"> <a href="year/{{key}}"> {{name}} </a></p>
+                        <p align="center">
+                        ${{amounts_by_name|get_item:name|intcomma}} </p>
+                    </div>
+                {% endfor %}
+            </div>
+    </div>
+    <div class="container" align="center">
+        <img src="data:image/png;base64,{{major_national_parties.chart}}"/> 
+    </div>
+    {% for key, value in major_national_parties.state_values.items %}
+    <div class="container">
+        <h2>{{key}}</h2>
+            <div class="row">
+            {% for details in value %}
+                <div class="col-lg-3">
+                    <p align="center"><img src="{{details.2}}" style="height:100px" class="img-responsive"></p>
+                    <p align="center">{{details.0}}</p>
+                    <p align="center">${{details.1|intcomma}}</p>
+                </div>
+            {% endfor %}
+            </div>
+    </div>
+    {% endfor %} 
+    </body>
+</html>
