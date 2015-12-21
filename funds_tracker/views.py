@@ -30,15 +30,14 @@ __license__ = 'MPL v2.0'
 
 from django.shortcuts import render
 from django.views import generic
+from collections import OrderedDict
 from funds_tracker.models import Donation, PartyInfo
 from django.db.models import Max, Sum
-import matplotlib.pyplot as plt
-from StringIO import StringIO
-import base64
 from settings import STATES_ABBR, STATES_LIST
 
 import operator
-from utilities import get_donation_year_total
+from utilities import get_donation_year_total, generate_pie_chart,\
+    generate_bar_chart
 from django.template.defaulttags import register
 
 ##############################################################################
@@ -55,6 +54,29 @@ COLOURS = []
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+
+@register.filter(name='test')
+def test_filter(xargs):
+    # import pdb
+    # db.set_trace()
+    return str(xargs.strip(' '))
+
+
+@register.filter(name='sort')
+def sort_dict(value):
+    if isinstance(value, dict):
+        new_dict = OrderedDict()
+        sorted_items = sorted(value.items())
+        for item in sorted_items:
+            new_dict[item[1]] = item[0]
+
+        return new_dict
+    elif isinstance(value, list):
+        return sorted(value)
+    else:
+        return value
+
 
 def get_summary(state):
     # Get the most recent year
@@ -128,23 +150,24 @@ class IndexView(generic.ListView):
                 COLOURS.append(OTHERS)
 
         # Generate Pie chart of national donations
-        patches, texts, autotexts = plt.pie(filtered_values,
-                                            labels=filtered_names,
-                                            autopct='%1.1f%%',
-                                            radius=0.8,
-                                            wedgeprops={'edgecolor': 'white',
-                                                        'linewidth': 2},
-                                            colors=COLOURS)
-        for t in texts:
-            t.set_size('smaller')
-            t.set_family('Arial')
-        for t in autotexts:
-            t.set_size('smaller')
-            t.set_color('white')
-            t.set_weight('bold')
-        chart_buffer = StringIO()
-        plt.savefig(chart_buffer, bbox_inches='tight', format="png")
-        chart = base64.b64encode(chart_buffer.getvalue())
+        # patches, texts, autotexts = plt.pie(filtered_values,
+        #                                    labels=filtered_names,
+        #                                    autopct='%1.1f%%',
+        #                                    radius=0.8,
+        #                                    wedgeprops={'edgecolor': 'white',
+        #                                                'linewidth': 2},
+        #                                    colors=COLOURS)
+        # for t in texts:
+        #    t.set_size('smaller')
+        #    t.set_family('Arial')
+        # for t in autotexts:
+        #    t.set_size('smaller')
+        #    t.set_color('white')
+        #    t.set_weight('bold')
+        # chart_buffer = StringIO()
+        # plt.savefig(chart_buffer, bbox_inches='tight', format="png")
+        # chart = base64.b64encode(chart_buffer.getvalue())
+        chart = generate_pie_chart(filtered_names, filtered_values, COLOURS)
 
         # Create a dictionary for statewide summaries
         state_names = []
@@ -176,18 +199,22 @@ class ImageView(generic.ListView):
 
 
 def PartySummaryView(request, pk):
-    party = PartyInfo.objects.filter(party=pk)
+    party = PartyInfo.objects.filter(party=str(pk).strip(' '))
     years = Donation.objects.filter(party=pk).order_by('-year')\
         .values_list('year', flat=True).distinct()
     amounts_by_year = {}
+    amounts = []
     for year in years:
         amounts_by_year[str(year)] = round(get_donation_year_total(pk, year), 0)
+        amounts.append(amounts_by_year[str(year)])
 
+    chart = generate_bar_chart(years, amounts)
     context = {
         'name': pk,
         'party': party,
         'years': years,
         'amounts_by_year': amounts_by_year,
+        'chart': chart,
     }
 
     template_name = 'funds_tracker/partyView.html'
@@ -196,23 +223,31 @@ def PartySummaryView(request, pk):
 
 
 def PartyYearView(request, pk, pk_y):
-    partyInfo = Donation.objects.filter(party=pk, year=pk_y).order_by('-amount')
+    partyInfo = Donation.objects.filter(party=str(pk).strip(' '),
+                                        year=str(pk_y).strip(' ')).order_by('-amount')
 
     template_name = 'funds_tracker/detailView.html'
 
     names = []
     amounts = []
     amounts_by_name = {}
+    amounts_by_value = {}
 
     for party in partyInfo:
         names.append(party.get_donor())
         amounts.append(party.amount)
         amounts_by_name[party.get_donor()] = party.amount
+        amounts_by_value[party.amount] = party.get_donor()
 
+    chart = generate_pie_chart(names[0:5], amounts[0:5], ['b', 'g', 'r', 'k'])
     context = {
+        'party': pk,
+        'year': pk_y,
         'names': names,
         'amounts': amounts,
         'amounts_by_name': amounts_by_name,
+        'amounts_by_value': amounts_by_value,
+        'chart': chart,
     }
 
     return render(request, template_name, context)

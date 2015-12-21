@@ -22,28 +22,14 @@
             <div class="row">
                 {% for key, value in amounts_by_year.items %}
                     <div class="col-lg-2">
-                        <p align="center"> <a href="year/{{key}}"> {{key}} </a></p>
+                        <p align="center"> <a href="{% url 'funds:party-year' name key %}"> {{key}} </a></p>
                         <p align="center"> ${{value|intcomma}} </p>
                     </div>
                 {% endfor %}
             </div>
     </div>
     <div class="container" align="center">
-        <img src="data:image/png;base64,{{major_national_parties.chart}}"/> 
+        <img src="data:image/png;base64,{{ chart }}"/> 
     </div>
-    {% for key, value in major_national_parties.state_values.items %}
-    <div class="container">
-        <h2>{{key}}</h2>
-            <div class="row">
-            {% for details in value %}
-                <div class="col-lg-3">
-                    <p align="center"><img src="{{details.2}}" style="height:100px" class="img-responsive"></p>
-                    <p align="center">{{details.0}}</p>
-                    <p align="center">${{details.1|intcomma}}</p>
-                </div>
-            {% endfor %}
-            </div>
-    </div>
-    {% endfor %} 
     </body>
 </html>

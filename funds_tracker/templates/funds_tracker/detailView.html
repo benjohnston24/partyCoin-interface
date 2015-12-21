@@ -15,36 +15,22 @@
     {% load humanize %}
     <body>
     <div class="container">
-        <h1>Detailed Party View: {{ name }}</h1>
+        <h1>Detailed Party View: {{ party }}, {{ year }}</h1>
     </div>
     <div class="container">
         <h2>Annual Donations </h2>
-            <div class="row">
-                {% for name in names %}
+            <div class="col-lge-1">
+                <img src="data:image/png;base64,{{ chart }}"/> 
+            </div>
+
+            <div class="col-lge-2">
+                {% for item in amounts_by_value.items|sort reversed %}
                     <div class="col-sml-2">
-                        <p align="center"> <a href="year/{{key}}"> {{name}} </a></p>
-                        <p align="center">
-                        ${{amounts_by_name|get_item:name|intcomma}} </p>
+                        <p align="center"> <a href="/funds_tracker/donor/"> {{ item.1 }} </a></p>
+                        <p align="center"> ${{ item.0|intcomma }} </p>
                     </div>
                 {% endfor %}
             </div>
     </div>
-    <div class="container" align="center">
-        <img src="data:image/png;base64,{{major_national_parties.chart}}"/> 
-    </div>
-    {% for key, value in major_national_parties.state_values.items %}
-    <div class="container">
-        <h2>{{key}}</h2>
-            <div class="row">
-            {% for details in value %}
-                <div class="col-lg-3">
-                    <p align="center"><img src="{{details.2}}" style="height:100px" class="img-responsive"></p>
-                    <p align="center">{{details.0}}</p>
-                    <p align="center">${{details.1|intcomma}}</p>
-                </div>
-            {% endfor %}
-            </div>
-    </div>
-    {% endfor %} 
     </body>
 </html>

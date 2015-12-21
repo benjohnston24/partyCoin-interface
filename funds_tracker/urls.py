@@ -33,10 +33,12 @@ from funds_tracker import views
 
 urlpatterns = patterns('',
                        url(r'^$', views.IndexView.as_view(), name='index'),
-                       url(r'^logos/$', views.ImageView.as_view(), name='logos'),
-                       url(r'^party/(?P<pk>[^/]+)/$', views.PartySummaryView, name='party'),
+                       url(r'^logos/$', views.ImageView.as_view(),
+                           name='funds-tracker-logos'),
+                       url(r'^partyview/(?P<pk>.+)/$', views.PartySummaryView,
+                           name='party-view'),
                        url(r'^party/(?P<pk>[^/]+)/year/(?P<pk_y>\w+)/$',
-                           views.PartyYearView, name='partyYear'),
+                           views.PartyYearView, name='party-year'),
                        url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {
                                                     'document_root': settings.MEDIA_ROOT,
                                                     'show_indexes': True})
