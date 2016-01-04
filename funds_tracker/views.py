@@ -56,10 +56,8 @@ def get_item(dictionary, key):
     return dictionary.get(key)
 
 
-@register.filter(name='test')
-def test_filter(xargs):
-    # import pdb
-    # db.set_trace()
+@register.filter(name='clean')
+def clean_filter(xargs):
     return str(xargs.strip(' '))
 
 
@@ -249,5 +247,13 @@ def PartyYearView(request, pk, pk_y):
         'amounts_by_value': amounts_by_value,
         'chart': chart,
     }
+
+    return render(request, template_name, context)
+
+
+def DonorView(request, pk):
+
+    template_name = 'funds_tracker/donorView.html'
+    context = {}
 
     return render(request, template_name, context)
