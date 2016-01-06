@@ -165,13 +165,13 @@ class IndexView(generic.ListView):
         # chart_buffer = StringIO()
         # plt.savefig(chart_buffer, bbox_inches='tight', format="png")
         # chart = base64.b64encode(chart_buffer.getvalue())
-        chart = generate_pie_chart(filtered_names, filtered_values, COLOURS)
+        # chart = generate_pie_chart(filtered_names, filtered_values, COLOURS)
 
         # Create a dictionary for statewide summaries
         state_names = []
         state_values = {}
 
-        # Get the NSW results
+        # Get the state results
         for state in STATES_LIST:
             max_year, filtered_parties, filtered_names, filtered_values = \
                 get_summary(state)
@@ -179,11 +179,18 @@ class IndexView(generic.ListView):
             state_values[STATES_ABBR[state]] = filtered_parties
 
         # print state_values['New South Wales']
+
+        # Generate chart data
+        chart_data = {}
+        for i in range(len(filtered_names)):
+            chart_data[filtered_names[i]] = filtered_values[i]
+
         return {'year': '%s - %d' % (max_year_FED, int(max_year_FED) + 1),
                 'summary': filtered_parties_FED,
                 'state_names': state_names,
                 'state_values': state_values,
-                'chart': chart,
+                'chart_data': chart_data,
+                # 'chart': chart,
                 }
 
 

@@ -8,9 +8,30 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
         
-        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-        <script type="text/javascript">google.load("visualization", "1", {packages:["corechart"]});
-        </script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+
+        var data = google.visualization.arrayToDataTable([
+                ['Party', 'Funding', {type: 'string', role: 'tooltip'}],
+
+            {% for value in major_national_parties.summary %}
+            [ '{{ value.0 }}', {{ value.1 }} , '{{ value.0 }} ${{ value.1}}'],
+
+            {% endfor %}
+
+        ]);
+
+        var options = {
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+
+        chart.draw(data, options);
+      }
+    </script>
     </head>
     {% load humanize %}
     <body>
@@ -24,16 +45,15 @@
                 {% for value in major_national_parties.summary %}
                     <div class="col-lg-3">
                         <p align="center"><img src="{{value.2}}" style="height:100px" class="img-responsive"></p>
-                        <p align="center"><a href="{% url 'funds:party-view' pk=value.0 %}"> {{ value.0 }} </a></p>
+                        <p align="center"><a href="{% url 'funds:party-view' pk=value.0|clean %}"> {{ value.0 }} </a></p>
                         <p align="center">${{value.1|intcomma}}</p>
                     </div>
                 {% endfor %} 
             </div>
         {% endif %}
     </div>
-    <div class="container" align="center">
-        <img src="data:image/png;base64,{{major_national_parties.chart}}"/> 
-    </div>
+
+    <div id="piechart" style="width: 900px; height: 500px;"></div>
     {% for key, value in major_national_parties.state_values.items %}
     <div class="container">
         <h2>{{key}}</h2>
