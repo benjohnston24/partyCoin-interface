@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+    {% load humanize %}
         <title>partyCoin - Australia's Political Party Funds Tracker </title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,53 +9,69 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
         
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    <script type="text/javascript">
-      google.load("visualization", "1", {packages:["corechart"]});
-      google.setOnLoadCallback(drawChart);
-      function drawChart() {
+        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+        <script type="text/javascript">
+          google.load("visualization", "1", {packages:["corechart"]});
+          google.setOnLoadCallback(drawChart);
+          function drawChart() {
 
-        var data = google.visualization.arrayToDataTable([
-                ['Party', 'Funding', {type: 'string', role: 'tooltip'}],
+            var data = google.visualization.arrayToDataTable([
+                    ['Party', 'Funding', {type: 'string', role: 'tooltip'}],
 
-            {% for value in major_national_parties.summary %}
-            [ '{{ value.0 }}', {{ value.1 }} , '{{ value.0 }} ${{ value.1}}'],
+                {% for value in major_national_parties.chart_data %}
+                [ '{{ value.0 }}', {{ value.1 }} , '{{ value.0 }} ${{value.1|intcomma}}'],
 
-            {% endfor %}
+                {% endfor %}
 
-        ]);
+            ]);
 
-        var options = {
-        };
+            var options = {
+                'legend': 'left',
+                'title': 'Federal Party Funding',
+            };
 
-        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+            var piechart_div = document.getElementById('piechart_div');
+            var chart = new google.visualization.PieChart(piechart_div);
 
-        chart.draw(data, options);
-      }
-    </script>
+            /*google.visualization.events.addListener(chart, 'ready', function () {
+                    piechart_div.innerHTML = '<img src="' + chart.getImageURI() + '">';
+                    console.log(piechart_div.innerHTML);
+                    });
+                    */
+
+            chart.draw(data, options);
+          }
+        </script>
     </head>
-    {% load humanize %}
     <body>
-    <div class="container">
-        <h1>Reporting Period: {{major_national_parties.year}}</h1>
-    </div>
-    <div class="container">
-        <h2>Federal Parties </h2>
-        {% if major_national_parties %}
-            <div class="row">
-                {% for value in major_national_parties.summary %}
-                    <div class="col-lg-3">
-                        <p align="center"><img src="{{value.2}}" style="height:100px" class="img-responsive"></p>
-                        <p align="center"><a href="{% url 'funds:party-view' pk=value.0|clean %}"> {{ value.0 }} </a></p>
-                        <p align="center">${{value.1|intcomma}}</p>
-                    </div>
-                {% endfor %} 
-            </div>
-        {% endif %}
-    </div>
+    <h1>Reporting Period: {{major_national_parties.year}}</h1>
+    <h2>Federal Parties</h2>
+    {% if major_national_parties %}
+    <table >
+            <tr>
+                <td rowspan=13 valign="center">
+                    <div id="piechart_div" style="width: 800px; height: 600px;"></div>
 
-    <div id="piechart" style="width: 900px; height: 500px;"></div>
-    {% for key, value in major_national_parties.state_values.items %}
+                </td>
+            </tr>
+            {% for value in major_national_parties.summary %}
+            <tr>
+                <td></td>
+                <td style="padding: 15px;" align="center"><img src="{{value.2}}" style="height:100px" class="img-responsive"></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td align="center"><a href="{% url 'funds:party-view' pk=value.0|clean %}"> {{ value.0 }} </a></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td align="center">${{value.1|intcomma}}</td>
+            </tr>
+                {% endfor %} 
+        </table>
+    {% endif %}
+
+    {% for key, value in major_national_parties.state_values.items|sort %}
     <div class="container">
         <h2>{{key}}</h2>
             <div class="row">

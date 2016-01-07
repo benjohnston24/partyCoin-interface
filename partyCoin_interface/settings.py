@@ -66,13 +66,10 @@ WSGI_APPLICATION = 'partyCoin_interface.wsgi.application'
 
 DATABASES = {
     'default': {
-        #'ENGINE': 'django.db.backends.sqlite3',
         'ENGINE': 'django.db.backends.mysql',
-        #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         'NAME': 'donations',
         'USER': 'partyCoin',
         'PASSWORD': 'password',
-        # 'PASSWORD': 'money',
         'HOST': 'localhost',
     }
 }
@@ -96,6 +93,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'funds_tracker', 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'funds_tracker', 'media')
 MEDIA_URL = '/media/'
 STATICFILE_DIRS = (

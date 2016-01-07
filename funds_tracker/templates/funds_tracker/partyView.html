@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+    {% load humanize %}
         <title>partyCoin - Australia's Political Party Funds Tracker </title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,16 +10,46 @@
         <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
         
         <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-        <script type="text/javascript">google.load("visualization", "1", {packages:["corechart"]});
+        <script type="text/javascript">
+          google.load("visualization", "1", {packages:["corechart"]});
+          google.setOnLoadCallback(drawChart);
+          function drawChart() {
+
+            var data = google.visualization.arrayToDataTable([
+                    ['Party', 'Funding', {type: 'string', role: 'tooltip'}],
+
+                {% for key, value in chart_data.items %}
+                    [ '{{ key }}', {{ value }} , '{{ key }}: ${{value|intcomma}}'],
+
+                {% endfor %}
+
+            ]);
+
+            var options = {
+                'legend': 'left',
+                'title': 'Federal Party Funding',
+            };
+
+            var chart = new
+                google.visualization.ColumnChart(document.getElementById('colchart_div'));
+
+            /*google.visualization.events.addListener(chart, 'ready', function () {
+                    piechart_div.innerHTML = '<img src="' + chart.getImageURI() + '">';
+                    console.log(piechart_div.innerHTML);
+                    });
+                    */
+
+            chart.draw(data, options);
+          }
         </script>
     </head>
-    {% load humanize %}
     <body>
     <div class="container">
         <h1>Detailed Party View: {{ name }}</h1>
     </div>
     <div class="container">
         <h2>Annual Donations </h2>
+        <div id="colchart_div" style="width: 800px; height: 600px;"></div>
             <div class="row">
                 {% for key, value in amounts_by_year.items %}
                     <div class="col-lg-2">
@@ -27,9 +58,6 @@
                     </div>
                 {% endfor %}
             </div>
-    </div>
-    <div class="container" align="center">
-        <img src="data:image/png;base64,{{ chart }}"/> 
     </div>
     </body>
 </html>

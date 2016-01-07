@@ -36,8 +36,7 @@ from django.db.models import Max, Sum
 from settings import STATES_ABBR, STATES_LIST
 
 import operator
-from utilities import get_donation_year_total, generate_pie_chart,\
-    generate_bar_chart
+from utilities import get_donation_year_total
 from django.template.defaulttags import register
 
 ##############################################################################
@@ -147,26 +146,6 @@ class IndexView(generic.ListView):
             else:
                 COLOURS.append(OTHERS)
 
-        # Generate Pie chart of national donations
-        # patches, texts, autotexts = plt.pie(filtered_values,
-        #                                    labels=filtered_names,
-        #                                    autopct='%1.1f%%',
-        #                                    radius=0.8,
-        #                                    wedgeprops={'edgecolor': 'white',
-        #                                                'linewidth': 2},
-        #                                    colors=COLOURS)
-        # for t in texts:
-        #    t.set_size('smaller')
-        #    t.set_family('Arial')
-        # for t in autotexts:
-        #    t.set_size('smaller')
-        #    t.set_color('white')
-        #    t.set_weight('bold')
-        # chart_buffer = StringIO()
-        # plt.savefig(chart_buffer, bbox_inches='tight', format="png")
-        # chart = base64.b64encode(chart_buffer.getvalue())
-        # chart = generate_pie_chart(filtered_names, filtered_values, COLOURS)
-
         # Create a dictionary for statewide summaries
         state_names = []
         state_values = {}
@@ -181,15 +160,16 @@ class IndexView(generic.ListView):
         # print state_values['New South Wales']
 
         # Generate chart data
-        chart_data = {}
-        for i in range(len(filtered_names)):
-            chart_data[filtered_names[i]] = filtered_values[i]
+        chart_data = []
+        for i in range(len(filtered_parties_FED)):
+            chart_data.append((filtered_parties_FED[i][0],
+                              (filtered_parties_FED[i][1] / 1000)))
 
         return {'year': '%s - %d' % (max_year_FED, int(max_year_FED) + 1),
                 'summary': filtered_parties_FED,
                 'state_names': state_names,
                 'state_values': state_values,
-                'chart_data': chart_data,
+                'chart_data': filtered_parties_FED,
                 # 'chart': chart,
                 }
 
@@ -213,13 +193,12 @@ def PartySummaryView(request, pk):
         amounts_by_year[str(year)] = round(get_donation_year_total(pk, year), 0)
         amounts.append(amounts_by_year[str(year)])
 
-    chart = generate_bar_chart(years, amounts)
     context = {
         'name': pk,
         'party': party,
         'years': years,
         'amounts_by_year': amounts_by_year,
-        'chart': chart,
+        'chart_data': amounts_by_year,
     }
 
     template_name = 'funds_tracker/partyView.html'
@@ -244,7 +223,6 @@ def PartyYearView(request, pk, pk_y):
         amounts_by_name[party.get_donor()] = party.amount
         amounts_by_value[party.amount] = party.get_donor()
 
-    chart = generate_pie_chart(names[0:5], amounts[0:5], ['b', 'g', 'r', 'k'])
     context = {
         'party': pk,
         'year': pk_y,
@@ -252,7 +230,6 @@ def PartyYearView(request, pk, pk_y):
         'amounts': amounts,
         'amounts_by_name': amounts_by_name,
         'amounts_by_value': amounts_by_value,
-        'chart': chart,
     }
 
     return render(request, template_name, context)
